@@ -3,15 +3,11 @@ MAINTAINER Razvan Crainea <razvan@opensips.org>
 
 USER root
 ENV DEBIAN_FRONTEND noninteractive
-ARG VERSION=2.3
+ARG VERSION=2.4
 
-WORKDIR /usr/local/src
-
-RUN apt-get update -qq && apt-get install -y build-essential \
-		git bison flex m4 pkg-config libncurses5-dev rsyslog
-
-RUN git clone https://github.com/OpenSIPS/opensips.git -b $VERSION opensips_$VERSION
-RUN cd opensips_$VERSION && make all && make install
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 049AD65B
+RUN echo "deb http://apt.opensips.org jessie $VERSION-releases" >/etc/apt/sources.list.d/opensips.list
+RUN apt-get update -qq && apt-get install -y rsyslog opensips
 
 RUN echo -e "local0.* -/var/log/opensips.log\n& stop" > /etc/rsyslog.d/opensips.conf
 RUN touch /var/log/opensips.log
