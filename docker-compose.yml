@@ -4,6 +4,7 @@ services:
   opensips:
     restart: always
     image: distributel/opensips
+    network_mode: host
     ports:
     - "5060:5060/udp"
     - "5060:5060/tcp"
