@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+  opensips:
+    restart: always
+    image: distributel/opensips
+    ports:
+    - "5060:5060/udp"
+    - "5060:5060/tcp"
+    volumes:
+    - /srv/docker/opensips:/etc/opensips
