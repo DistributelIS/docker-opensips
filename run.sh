@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export HOST_IP=$(ip route get 8.8.8.8 | head -n +1 | tr -s " " | cut -d " " -f 7)
-export PUBLIC_IP=$(curl http://wtfismyip.com/text)
+export PUBLIC_IP=$(curl -s http://wtfismyip.com/text)
 
 cd /etc/opensips
 
