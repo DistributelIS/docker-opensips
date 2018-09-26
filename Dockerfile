@@ -7,7 +7,7 @@ ARG VERSION=2.4
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 049AD65B
 RUN echo "deb http://apt.opensips.org jessie $VERSION-releases" >/etc/apt/sources.list.d/opensips.list
-RUN apt-get update -qq && apt-get install -y rsyslog curl python-setuptools opensips && easy_install j2cli
+RUN apt-get update -qq && apt-get install -y rsyslog curl python-setuptools opensips opensips-sqlite-module opensips-tls-module opensips-xmlrpc-module && easy_install j2cli
 
 RUN echo -e "local0.* -/var/log/opensips.log\n& stop" > /etc/rsyslog.d/opensips.conf
 RUN touch /var/log/opensips.log
