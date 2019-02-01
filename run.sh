@@ -1,30 +1,46 @@
-#!/bin/bash
+#/bin/bash
 
-export HOST_IP=$(ip route get 8.8.8.8 | head -n +1 | tr -s " " | cut -d " " -f 7)
-export PUBLIC_IP=$(curl -s http://wtfismyip.com/text)
+## Start script for an OpenSIPS Container running on a Docker Host.
+##     Mario Stoccc <maro.stocco@thinktel.ca>
+##     February 1, 2018
+##
+## OpenSIPS is expected to run with host networking; meaning this
+## container’s network stack is not isolated from the Docker host.
+## Instead, we separate each OpenSIPS container by assigning it a
+## unique IP address and setting the "listen" global parameter.
+##
+## Before we begin, we need an error free OpenSIPS configuration file
+## and a check that no other node is using the IP address in the the
+## configuration file.
 
-cd /etc/opensips
 
-if [ -e opensips.cfg.j2 ]; then
-	if [ -e opensips.json ]; then
-		if [[ opensips.json -nt opensips.cfg || opensips.cfg.j2 -nt opensips.cfg ]]; then
-			echo "Regenerating config from template with JSON..."
-			/usr/local/bin/j2 opensips.cfg.j2 opensips.json > opensips.cfg
-		fi
-	else
-		if [ opensips.cfg.j2 -nt opensips.cfg ]; then
-			echo "Regenerating config from template..."
-			/usr/local/bin/j2 opensips.cfg.j2 > opensips.cfg
-		fi
-	fi
-else
-	if [ -e opensips.cfg ]; then
-		sed -i "s/listen=.*/listen=udp:${HOST_IP}:5060 as ${PUBLIC_IP}:5060/g" /etc/opensips/opensips.cfg
-	fi
+/usr/sbin/opensips -c -f /etc/opensips/opensips.cfg > /tmp/config-check 2>&1
+configcheck=$(cat /tmp/config-check)
+if [[ $configcheck == *'CRITICAL'* ]]; then
+	grep CRIT /tmp/config-check
+	echo 'OpenSIPS not started because of errors in opensips.cfg'
+	exit;
 fi
 
-service rsyslog start
+ipaddr="$(grep -m 1 -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' <<< "$configcheck")"
+if [ $ipaddr == '127.0.0.1' ]; then
+	echo 'OpenSIPS not started because you are using the stock opensips.cfg'
+	exit;
+fi
 
-/usr/sbin/opensipsctl start
+ipcheck=$(ping -c 2 $ipaddr)
+if [[ $ipcheck == *'100% packet loss'* ]]; then
+	/usr/sbin/opensips -f /etc/opensips/opensips.cfg
+	while : ; do
+		sleep 3
+		running=$(pgrep opensips)
+		if [ "$running" == "" ]; then
+			echo 'OBITUARY: OpenSIPS has died' >> /etc/opensips/log/opensips.log
+			exit
+		fi
+	done
+fi
 
-tail -f /var/log/opensips.log
+echo OpenSIPS not started because $ipaddr is in use.
+exit
+
