@@ -23,24 +23,28 @@ if [[ $configcheck == *'CRITICAL'* ]]; then
 fi
 
 ipaddr="$(grep -m 1 -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' <<< "$configcheck")"
-if [ $ipaddr == '127.0.0.1' ]; then
-	echo 'OpenSIPS not started because you are using the stock opensips.cfg'
-	exit;
+if [ $ipaddr != '' ]; then
+	if [ $ipaddr == '127.0.0.1' ]; then
+		echo 'OpenSIPS not started because you are using the stock opensips.cfg'
+		exit;
+	fi
+
+	ipcheck=$(ping -c 2 $ipaddr)
+	if [[ $ipcheck == *'100% packet loss'* ]]; then
+		/usr/sbin/opensips -f /etc/opensips/opensips.cfg
+		while : ; do
+			sleep 3
+			running=$(pgrep opensips)
+			if [ "$running" == "" ]; then
+				echo 'OBITUARY: OpenSIPS has died' >> /etc/opensips/log/opensips.log
+				exit
+			fi
+		done
+	fi
+	echo OpenSIPS not started because $ipaddr is in use.
+	exit
 fi
 
-ipcheck=$(ping -c 2 $ipaddr)
-if [[ $ipcheck == *'100% packet loss'* ]]; then
-	/usr/sbin/opensips -f /etc/opensips/opensips.cfg
-	while : ; do
-		sleep 3
-		running=$(pgrep opensips)
-		if [ "$running" == "" ]; then
-			echo 'OBITUARY: OpenSIPS has died' >> /etc/opensips/log/opensips.log
-			exit
-		fi
-	done
-fi
-
-echo OpenSIPS not started because $ipaddr is in use.
+echo OpenSIPS not started because $ipaddr not defined.
 exit
 
