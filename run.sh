@@ -18,14 +18,14 @@
 configcheck=$(cat /tmp/config-check)
 if [[ $configcheck == *'CRITICAL'* ]]; then
 	grep CRIT /tmp/config-check
-	echo 'OpenSIPS not started because of errors in opensips.cfg'
+	echo 'OpenSIPS NOT STARTED: Critical errors in opensips.cfg'
 	exit;
 fi
 
 ipaddr="$(grep -m 1 -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' <<< "$configcheck")"
 if [ $ipaddr != '' ]; then
 	if [ $ipaddr == '127.0.0.1' ]; then
-		echo 'OpenSIPS not started because you are using the stock opensips.cfg'
+		echo 'OpenSIPS NOT STARTED: Are you are using the stock opensips.cfg?'
 		exit;
 	fi
 
@@ -41,10 +41,9 @@ if [ $ipaddr != '' ]; then
 			fi
 		done
 	fi
-	echo OpenSIPS not started because $ipaddr is in use.
+	echo OpenSIPS NOT STARTED: $ipaddr is in use somewhere else.
 	exit
 fi
 
-echo OpenSIPS not started because $ipaddr not defined.
+echo OpenSIPS NOT STARTED: No IP address was defined in opensips.cfg.
 exit
-
