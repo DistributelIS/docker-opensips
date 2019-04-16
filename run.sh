@@ -25,6 +25,7 @@ else
 	fi
 fi
 
+WORKED_ONCE=0
 
 while : ; do
 	echo "Checking on OpenSIPS..."
@@ -34,16 +35,25 @@ while : ; do
 		curpid=`cat ${OPENSIPS_PID}`
 		if [ -e /proc/$curpid -a /proc/$curpid/exe ]; then
 
-			sipsak -N -D 1 -s sip:nobody@$ipaddr
+			/usr/bin/sipsak -D 1 -s sip:nobody@${HOST_IP}
 
 			if [ $? -ne 0 ]; then
-				echo 'WARNING: OpenSIPS is not responding to sipsak' >> /etc/opensips/opensips.log
-				kill `cat ${OPENSIPS_PID}`
+				if [ ${WORKED_ONCE} -ne 0 ]; then
+					echo 'Health check failed, killing OpenSIPS'
+					kill `cat ${OPENSIPS_PID}`
+				else
+					continue
+				fi
 			else
+				WORKED_ONCE=1
 				continue
 			fi
 		fi
+	else
+		echo "no pid found!"
 	fi
 
-	/usr/sbin/opensips -P ${OPENSIPS_PID} -D -f opensips.cfg 1> /dev/stdout 2> /dev/stderr &
+	/usr/sbin/opensips -F -f opensips.cfg 1> /dev/stdout 2> /dev/stderr &
+	pid=$!
+	echo ${pid} > ${OPENSIPS_PID}
 done
