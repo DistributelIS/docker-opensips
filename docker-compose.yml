@@ -8,4 +8,4 @@ services:
     - "5060:5060/udp"
     - "5060:5060/tcp"
     volumes:
-    - /srv/docker/opensips:/etc/opensips
+    - ./opensips:/etc/opensips

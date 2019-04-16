@@ -11,9 +11,6 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 049AD65B
 RUN echo "deb http://apt.opensips.org stretch $VERSION-releases" >/etc/apt/sources.list.d/opensips.list
 RUN apt-get update -qq && apt-get install -y  opensips opensips-sqlite-module opensips-tls-module opensips-xmlrpc-module opensips-python-module && easy_install j2cli
 
-RUN echo 'local0.* -/var/log/opensips.log\n& stop' > /etc/rsyslog.d/opensips.conf
-RUN touch /var/log/opensips.log
-
 EXPOSE 5060/udp
 
 COPY run.sh /run.sh
