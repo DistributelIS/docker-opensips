@@ -1,7 +1,15 @@
 #!/bin/bash
 
-export HOST_IP=$(ip route get 8.8.8.8 | head -n +1 | tr -s " " | cut -d " " -f 7)
-export PUBLIC_IP=$(curl -s http://wtfismyip.com/text)
+HOST_IP=$(ip route get 8.8.8.8 | head -n +1 | tr -s " " | cut -d " " -f 7)
+PUBLIC_IP=$(curl -s http://wtfismyip.com/text)
+
+if [ -n "$OPENSIPS_IP" ]; then
+		HOST_IP=${OPENSIPS_IP}
+		PUBLIC_IP=${OPENSIPS_IP}
+	else
+		HOST_IP=$(ip route get 8.8.8.8 | head -n +1 | tr -s " " | cut -d " " -f 7)
+		PUBLIC_IP=$(curl -s http://wtfismyip.com/text)
+fi
 
 OPENSIPS_PID=/var/run/opensips/opensips.pid
 
