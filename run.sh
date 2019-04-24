@@ -40,7 +40,7 @@ while : ; do
 		curpid=`cat ${OPENSIPS_PID}`
 		if [ -e /proc/$curpid -a /proc/$curpid/exe ]; then
 
-			/usr/bin/sipsak -D 1 -s sip:nobody@${HOST_IP}
+			/usr/bin/sipsak -D 1 -s sip:health@${HOST_IP}
 
 			if [ $? -ne 0 ]; then
 				if [ ${WORKED_ONCE} -ne 0 ]; then
