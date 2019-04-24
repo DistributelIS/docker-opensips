@@ -36,9 +36,6 @@ fi
 WORKED_ONCE=0
 
 while : ; do
-	echo "Checking on OpenSIPS..."
-	sleep 2
-
 	if [ -e ${OPENSIPS_PID} ]; then
 		curpid=`cat ${OPENSIPS_PID}`
 		if [ -e /proc/$curpid -a /proc/$curpid/exe ]; then
@@ -57,11 +54,11 @@ while : ; do
 				continue
 			fi
 		fi
-	else
-		echo "no pid found!"
 	fi
 
 	/usr/sbin/opensips -F -f opensips.cfg 1> /dev/stdout 2> /dev/stderr &
 	pid=$!
 	echo ${pid} > ${OPENSIPS_PID}
+
+	sleep 30
 done
