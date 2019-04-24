@@ -56,7 +56,7 @@ while : ; do
 		fi
 	fi
 
-	/usr/sbin/opensips -F -f opensips.cfg 1> /dev/stdout 2> /dev/stderr &
+	/usr/sbin/opensips -E -F -f opensips.cfg 1> /dev/stdout 2> /dev/stderr &
 	pid=$!
 	echo ${pid} > ${OPENSIPS_PID}
 
