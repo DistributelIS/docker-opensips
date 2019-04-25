@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:stretch-slim
 MAINTAINER Razvan Crainea <razvan@opensips.org>
 
 USER root
